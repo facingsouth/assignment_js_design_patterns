@@ -77,8 +77,8 @@ var model = {
       if (!(model.cards[i].flipped)){
         return false
       }
-    return true;
     }
+    return true;
   }
 }
 
@@ -105,8 +105,8 @@ var controller = {
     model.flipCard(parseInt(target.id));
     this.flipCount++;
     controller.handleMatches();
-    // view.updatePoints(model.points);
-    // controller.checkGameOver();
+    view.updatePoints(model.points);
+    controller.checkGameOver();
   },
 
   handleMatches: function(){
@@ -124,6 +124,14 @@ var controller = {
     // Actually append divs to board.
     for (var i = 0; i < model.cards.length; i++){
       board.append("<div id='" + i + "' class='card flipped'>" + model.cards[i].val + "</div>")
+    }
+  },
+
+  checkGameOver: function() {
+    if (model.gameOver()) {
+      var message = "You win! It took you " + this.flipCount/2 +" tries." 
+      + "Your score was " + model.points;
+      view.updatePoints(message);
     }
   }
 }
@@ -174,6 +182,10 @@ var view = {
 
   sizeBoard: function(size){
     $("#board").width(size);
+  },
+
+  updatePoints: function(points) {
+    $('#score').text(points);
   }
 }
 
