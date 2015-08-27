@@ -3,7 +3,7 @@
 // Ignore score for now
 
 // 2x2 Board
-var BOARDSIZE = 2;
+var BOARDSIZE = 8;
 
 // Internal representation of a given card
 function Card(val){
@@ -31,7 +31,11 @@ var model = {
     for(var i = 0; i < BOARDSIZE; i++){
       model.cards.push(new Card(i));
       model.cards.push(new Card(i));
-    }
+    };
+
+    model.cards.sort(function () {
+     return [1, -1, 0][Math.random() *3 |0];
+    });
   },
 
   flipCard: function(index){
@@ -76,9 +80,8 @@ var controller = {
     model.flipCard(parseInt(target.id));
     this.flipCount++;
     if (this.flipCount % 2 === 0) {
-      var matching = model.checkIfCardsMatch();
-      if (matching) {
-        view.setMatchingCards(matching);
+      if (model.checkIfCardsMatch()) {
+        view.setMatchingCards();
       } else {
         view.unflipCards();
         model.unflipCards();
@@ -118,16 +121,22 @@ var view = {
 
   unflipCards: function() {
     var $cards = $('.flipped');
-    $cards.toggleClass('flipped');
-    $cards.toggleClass('unflipped');
+    $cards.removeClass("flipped")
+    setTimeout(function() {
+      $cards.toggleClass('unflipped');
+    }, 1000)
+
   },
 
-  setMatchingCards: function(cards) {
-    for (var i=0; i<model.cards.length; i++) {
-      var $card = $('#' + model.cards[i].id);
-      $card.removeClass("flipped unflipped");
-      $card.addClass("matched");
-    }
+  setMatchingCards: function() {
+    // for (var i=0; i<model.cards.length; i++) {
+    //   var $card = $('#' + model.cards[i].id);
+    //   $card.removeClass("flipped unflipped");
+    //   $card.addClass("matched");
+    // }
+    var $cards = $('.flipped')
+    $cards.removeClass("flipped unflipped");
+    $cards.addClass("matched");
   },
 }
 
