@@ -57,7 +57,12 @@ var model = {
       model.points += 10;
       return result;
     } else {
-      model.points -= 3;
+      // Decrease points, don't let them go under 0.
+      if (model.points - 3 > 0) {
+        model.points -= 3;
+      } else {
+        model.points = 0;
+      }
       return false;
     }
   },
@@ -129,7 +134,7 @@ var controller = {
 
   checkGameOver: function() {
     if (model.gameOver()) {
-      var message = "You win! It took you " + this.flipCount/2 +" tries." 
+      var message = "You win! It took you " + this.flipCount/2 +" tries."
       + "Your score was " + model.points;
       view.updatePoints(message);
     }
@@ -155,6 +160,7 @@ var view = {
   },
 
   flipCard: function(e) {
+    $(e.target).effect("shake", { times:3, distance: 5 }, 150);
     $(e.target).toggleClass('unflipped');
     $(e.target).toggleClass('flipped');
     controller.play(e.target);
@@ -162,8 +168,10 @@ var view = {
 
   unflipCards: function() {
     var $cards = $('.flipped');
+    $cards.addClass("nonmatch");
     $cards.removeClass("flipped")
     setTimeout(function() {
+      $cards.removeClass("nonmatch");
       $cards.toggleClass('unflipped');
     }, 1000)
 
