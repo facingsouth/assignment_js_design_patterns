@@ -189,8 +189,8 @@ var view = {
   },
 
   sizeCards: function(bs){
-    $(".card").width(1024/bs - 20);
-    $(".card").height(700/bs - 20);
+    $(".card").width(Math.round($('#board').width()/bs) - 21);
+    $(".card").height(Math.round($(window).height()/bs * .6) - 21);
   },
 
   updatePoints: function(points) {
