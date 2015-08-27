@@ -6,16 +6,16 @@
 var BOARDSIZE = 2;
 
 // Internal representation of a given card
-var card = function(value){
-  value: value,
-  flipped: false,
+function Card(val){
+  this.val = val;
+  this.flipped = false;
 
   // Cards can toggle their flipped state.
-  flip: function(){
-    if (flipped){
-      flipped = false;
+  this.flip = function(){
+    if (this.flipped){
+      this.flipped = false;
     } else {
-      flipped = true;
+      this.flipped = true;
     }
   }
 }
@@ -24,42 +24,58 @@ var card = function(value){
 var model = {
 
   init: function(){
-    var cards = [];
-    var previousCard = null;
-    var currentCard = null;
+    model.cards = [];
+    model.previousCard = null;
+    model.currentCard = null;
 
     for(var i = 0; i < BOARDSIZE; i++){
-      cards.push(card(value));
+      model.cards.push(new Card(i));
+      model.cards.push(new Card(i));
     }
-  }
+  },
 
   flipCard: function(index){
     // Get the correct card and flip it.
-    currentCard = cards[i];
-    currentCard[i].flip();
+    console.log(index);
+    model.previousCard = model.currentCard;
+
+    model.currentCard = this.cards[parseInt(index)];
+    model.currentCard.flip();
 
     // Check to see if flipped cards match if applicable
-    // checkIfCardsMatch(currentCard);
-  }
+    // checkIfCardsMatch(model.currentCard);
+  },
 
   checkIfCardsMatch: function(card){
-    if (currentCard.value === previousCard.value) {
-      var result = [currentCard, previousCard];
-      currentCard = previousCard = null;
+    if (model.currentCard.val === model.previousCard.val) {
+      var result = [model.currentCard, model.previousCard];
+      model.currentCard = model.previousCard = null;
       return result;
     } else {
       return false;
     }
+  },
 
+  unflipCards: function(){
+    model.currentCard.flip();
+    model.previousCard.flip();
+    model.currentCard = model.previousCard = null;
   }
 }
 
 var controller = {
   flipCount: 0,
+
+  init: function(){
+    model.init();
+    this.initializeBoard();
+    view.init();
+  },
+
   play: function(target){
     model.flipCard(parseInt(target.id));
-    flipCount++;
-    if (flipCount % 2 === 0) {
+    this.flipCount++;
+    if (this.flipCount % 2 === 0) {
       var matching = model.checkIfCardsMatch();
       if (matching) {
         view.setMatchingCards(matching);
@@ -68,6 +84,14 @@ var controller = {
         model.unflipCards();
       }
 
+    }
+  },
+
+  initializeBoard: function(){
+    var board = $("#board");
+    // Actually append divs to board.
+    for (var i = 0; i < model.cards.length; i++){
+      board.append("<div id='" + i + "' class='card unflipped'>" + model.cards[i].val + "</div>")
     }
   }
 }
@@ -83,41 +107,33 @@ var controller = {
 var view = {
 
   init: function() {
-    $('#board').on('click', '.unflipped', function(e) {flipCard(e)});
+    $('#board').on('click', '.unflipped', function(e) {view.flipCard(e)});
   },
 
   flipCard: function(e) {
-    $(e.target).toggleClass('.unflipped');
-    $(e.target).toggleClass('.flipped');
+    $(e.target).toggleClass('unflipped');
+    $(e.target).toggleClass('flipped');
     controller.play(e.target);
   },
 
   unflipCards: function() {
-    $('.flipped').toggleClass('flipped');
-    $('.flipped').toggleClass('unflipped');
+    var $cards = $('.flipped');
+    $cards.toggleClass('flipped');
+    $cards.toggleClass('unflipped');
   },
 
   setMatchingCards: function(cards) {
-    for (var i=0; i<cards.length; i++) {
-      $('#' + cards[i].id).removeClass("flipped unflipped").addClass("matched");
+    for (var i=0; i<model.cards.length; i++) {
+      var $card = $('#' + model.cards[i].id);
+      $card.removeClass("flipped unflipped");
+      $card.addClass("matched");
     }
-  }
-
-
+  },
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+$(document).ready(function(){
+    controller.init();
+});
 
 
 
