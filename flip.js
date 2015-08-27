@@ -94,7 +94,7 @@ var controller = {
     var bs = controller.getBoardSize();
     model.init(bs);
     this.initializeBoard();
-    view.sizeBoard(bs * 80);
+    view.sizeCards(bs);
     view.init();
   },
 
@@ -188,8 +188,9 @@ var view = {
     $cards.addClass("matched");
   },
 
-  sizeBoard: function(size){
-    $("#board").width(size);
+  sizeCards: function(bs){
+    $(".card").width(1024/bs - 20);
+    $(".card").height(700/bs - 20);
   },
 
   updatePoints: function(points) {
