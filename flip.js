@@ -3,7 +3,6 @@
 // Ignore score for now
 
 // 2x2 Board
-var BOARDSIZE = 8;
 
 // Internal representation of a given card
 function Card(val){
@@ -23,12 +22,13 @@ function Card(val){
 // Keeps track of the game's internal state.
 var model = {
 
-  init: function(){
+  init: function(boardsize){
     model.cards = [];
+    model.points = 0;
     model.previousCard = null;
     model.currentCard = null;
 
-    for(var i = 0; i < BOARDSIZE; i++){
+    for(var i = 0; i < (boardsize * boardsize / 2); i++){
       model.cards.push(new Card(i));
       model.cards.push(new Card(i));
     };
@@ -54,8 +54,10 @@ var model = {
     if (model.currentCard.val === model.previousCard.val) {
       var result = [model.currentCard, model.previousCard];
       model.currentCard = model.previousCard = null;
+      model.points += 10;
       return result;
     } else {
+      model.points -= 3;
       return false;
     }
   },
@@ -64,6 +66,19 @@ var model = {
     model.currentCard.flip();
     model.previousCard.flip();
     model.currentCard = model.previousCard = null;
+  },
+
+  gameOver: function(){
+    return model.allCardsMatched();
+  },
+
+  allCardsMatched: function(){
+    for (var i = 0; i < model.cards.length; i++){
+      if (!(model.cards[i].flipped)){
+        return false
+      }
+    return true;
+    }
   }
 }
 
@@ -71,22 +86,36 @@ var controller = {
   flipCount: 0,
 
   init: function(){
-    model.init();
+    var bs = controller.getBoardSize();
+    model.init(bs);
     this.initializeBoard();
+    view.sizeBoard(bs * 80);
     view.init();
+  },
+
+  getBoardSize: function(){
+    var bs = 1;
+    while (bs % 2 || isNaN(bs)) {
+      bs = parseInt(prompt("What board size do you want EVEN ONLY?"));
+    }
+    return bs;
   },
 
   play: function(target){
     model.flipCard(parseInt(target.id));
     this.flipCount++;
+    controller.handleMatches();
+    // view.updatePoints(model.points);
+    // controller.checkGameOver();
+  },
+
+  handleMatches: function(){
     if (this.flipCount % 2 === 0) {
-      if (model.checkIfCardsMatch()) {
-        view.setMatchingCards();
-      } else {
+      if (model.checkIfCardsMatch()) view.setMatchingCards();
+      else {
         view.unflipCards();
         model.unflipCards();
       }
-
     }
   },
 
@@ -94,7 +123,7 @@ var controller = {
     var board = $("#board");
     // Actually append divs to board.
     for (var i = 0; i < model.cards.length; i++){
-      board.append("<div id='" + i + "' class='card unflipped'>" + model.cards[i].val + "</div>")
+      board.append("<div id='" + i + "' class='card flipped'>" + model.cards[i].val + "</div>")
     }
   }
 }
@@ -110,7 +139,11 @@ var controller = {
 var view = {
 
   init: function() {
-    $('#board').on('click', '.unflipped', function(e) {view.flipCard(e)});
+
+    setTimeout(function(){
+      $("#board div").removeClass('flipped').addClass('unflipped');
+      $('#board').on('click', '.unflipped', function(e) {view.flipCard(e)});
+    }, 1000)
   },
 
   flipCard: function(e) {
@@ -138,6 +171,10 @@ var view = {
     $cards.removeClass("flipped unflipped");
     $cards.addClass("matched");
   },
+
+  sizeBoard: function(size){
+    $("#board").width(size);
+  }
 }
 
 $(document).ready(function(){
